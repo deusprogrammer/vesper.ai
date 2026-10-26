@@ -17,6 +17,8 @@ Extraction rules:
 - "id" is the lowercase kebab-case form of the name (e.g. "Mara Voss" -> "mara-voss").
 - "relationships": one entry per other named person. "relation" is a short label; "details" is one sentence, or "" if nothing is said.
 - "locations": one entry per place mentioned (cities, countries, buildings, worlds). "relevance" says why it matters to the character, e.g. "where she was created".
+- "characters": lightweight name/description records of other named people. Include only established details.
+- "memories" and "events": return empty arrays. ReflectionAgent records and scores these after completed conversation turns.
 - "facts": subject-predicate-object triples for important information that fits no other field (origins, abilities, appearance details, events, apparent vs actual age). "subject" is the character's id (or another named entity), "predicate" is snake_case (e.g. "spread_via"), "object" is a short phrase. Never put relationships, hobbies, likes, dislikes, locations, personality or speech style in "facts"; they belong elsewhere.
 - "hobbies", "likes", "dislikes": short lowercase phrases, no duplicates, and keep each fact in only one list.
 - "description": a concise third-person paragraph covering physical appearance, then back story.

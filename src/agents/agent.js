@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import OpenAI from 'openai';
 import { randomUUID } from 'node:crypto';
+import { logAgentEvent } from '../utilities/agent-trace.js';
 
 export const DEFAULT_MODEL = 'qwen3:8b';
 
@@ -26,8 +27,8 @@ export class Agent {
         this.client = new OpenAI({ apiKey });
     }
 
-    async _run(input) {
-        this.messages = [{ role: 'user', content: input }];
+    async _run(input, history = []) {
+        this.messages = [...history, { role: 'user', content: input }];
         return this.#respond();
     }
 
@@ -56,12 +57,36 @@ export class Agent {
             reasoning: request.reasoning,
         };
         const started = Date.now();
+        logAgentEvent({ ...metadata, event: 'request', request });
         let response;
         try {
             response = await this.client.responses.create(request);
         } catch (error) {
+            logAgentEvent({
+                ...metadata,
+                event: 'error',
+                durationMs: Date.now() - started,
+                error: {
+                    name: error.name,
+                    message: error.message,
+                    status: error.status,
+                    code: error.code,
+                },
+            });
             throw error;
         }
+        logAgentEvent({
+            ...metadata,
+            event: 'response',
+            durationMs: Date.now() - started,
+            response: {
+                id: response.id,
+                status: response.status,
+                output_text: response.output_text,
+                output: response.output,
+                usage: response.usage,
+            },
+        });
         return response.output_text;
     }
 }
