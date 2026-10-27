@@ -19,8 +19,7 @@ Extraction rules:
 - "locations": one entry per place mentioned (cities, countries, buildings, worlds). "relevance" says why it matters to the character, e.g. "where she was created".
 - "characters": lightweight name/description records of other named people. Include only established details.
 - "memories" and "events": return empty arrays. ReflectionAgent records and scores these after completed conversation turns.
-- "facts": subject-predicate-object triples for important information that fits no other field (origins, abilities, appearance details, events, apparent vs actual age). "subject" is the character's id (or another named entity), "predicate" is snake_case (e.g. "spread_via"), "object" is a short phrase. Never put relationships, hobbies, likes, dislikes, locations, personality or speech style in "facts"; they belong elsewhere.
-- "hobbies", "likes", "dislikes": short lowercase phrases, no duplicates, and keep each fact in only one list.
+- "facts": subject-predicate-object triples for important information that fits no other field (hobbies, likes, dislikes, origins, abilities, appearance details, events, apparent vs actual age). "subject" is the character's id (or another named entity), "predicate" is snake_case (e.g. "spread_via"), "object" is a short phrase. Never put relationships, locations, personality or speech style in "facts"; they belong elsewhere.
 - "description": a concise third-person paragraph covering physical appearance, then back story.
 - "systemPrompt": written in second person ("You are ..."), covering who the character is, their personality, speech style, relationships, and likes/dislikes. Tell the model to stay in character. Only forbid mentioning being an AI if the character is a human or otherwise not an AI; if the character is an AI, embrace that nature as part of who they are. Do not include facts absent from the other fields.
 `.trim();

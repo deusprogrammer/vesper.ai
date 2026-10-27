@@ -3,7 +3,6 @@ import { AgentLogger } from '../utilities/logging.js';
 import { parsePath, queryPath } from '../utilities/json-path.js';
 import { Agent } from './agent.js';
 import { characterSchema } from './character-schema.js';
-import { reinforceMemories } from '../utilities/memory.js';
 
 // systemPrompt and id are left out: the character already runs on its systemPrompt.
 const SELECTABLE_FIELDS = [
@@ -104,7 +103,7 @@ export default class ContextAgent extends Agent {
                 }
             }
         }
-        reinforceMemories(accessed);
+        //reinforceMemories(accessed);
         const context = Object.fromEntries(selected.map(({ path, parsed }) => [path, queryPath(next, parsed)]));
         Object.assign(character, next);
         this.logger.debug('Selecting these keys based on the conversation:', {

@@ -1,3 +1,4 @@
+
 import 'dotenv/config';
 import OpenAI from 'openai';
 import { randomUUID } from 'node:crypto';
@@ -5,8 +6,17 @@ import { logAgentEvent } from '../utilities/agent-trace.js';
 
 export const DEFAULT_MODEL = 'qwen3:8b';
 
-// Effort levels accepted by the OpenAI Responses API. Not every model or server supports all of them.
-export const REASONING_LEVELS = ['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'];
+// Effort levels accepted by the OpenAI Responses API.
+// Not every model or server supports all of them.
+export const REASONING_LEVELS = [
+    'none',
+    'minimal',
+    'low',
+    'medium',
+    'high',
+    'xhigh',
+    'max'
+];
 
 export class Agent {
     messages = [];
@@ -17,9 +27,15 @@ export class Agent {
         agentModel,
         reasoning,
     } = {}) {
-        if (reasoning !== undefined && !REASONING_LEVELS.includes(reasoning)) {
-            throw new TypeError(`reasoning must be one of ${REASONING_LEVELS.join(', ')}, or undefined.`);
+        if (
+            reasoning !== undefined &&
+            !REASONING_LEVELS.includes(reasoning)
+        ) {
+            throw new TypeError(
+                `reasoning must be one of ${REASONING_LEVELS.join(', ')}, or undefined.`
+            );
         }
+
         this.agentId = randomUUID();
         this.systemPrompt = systemPrompt;
         this.model = agentModel || DEFAULT_MODEL;
@@ -27,28 +43,64 @@ export class Agent {
         this.client = new OpenAI({ apiKey });
     }
 
-    async _run(input, history = []) {
-        this.messages = [...history, { role: 'user', content: input }];
-        return this.#respond();
+    /**
+     * Start a new inference with optional conversation history
+     * and an optional system prompt override.
+     *
+     * The override applies only to this inference.
+     */
+    async _run(
+        input,
+        history = [],
+        { systemPrompt = this.systemPrompt } = {}
+    ) {
+        this.messages = [
+            ...history,
+            { role: 'user', content: input }
+        ];
+
+        return this.#respond(systemPrompt);
     }
 
+    /**
+     * Continue the existing conversation using the agent's
+     * original system prompt.
+     */
     async _continue(input) {
-        this.messages.push({ role: 'user', content: input });
+        this.messages.push({
+            role: 'user',
+            content: input
+        });
+
         return this.#respond();
     }
 
-    async #respond() {
+    /**
+     * Execute an inference through the OpenAI Responses API.
+     */
+    async #respond(systemPrompt = this.systemPrompt) {
         const request = {
             model: this.model,
-            ...(this.reasoning === undefined ? {} : {
-                reasoning: { effort: this.reasoning },
-            }),
+
+            ...(this.reasoning === undefined
+                ? {}
+                : {
+                    reasoning: {
+                        effort: this.reasoning
+                    }
+                }),
+
             input: [
-                { role: 'system', content: this.systemPrompt },
-                ...this.messages,
-            ],
+                {
+                    role: 'system',
+                    content: systemPrompt
+                },
+                ...this.messages
+            ]
         };
+
         const requestId = randomUUID();
+
         const metadata = {
             agent: this.constructor.name,
             agentId: this.agentId,
@@ -56,9 +108,17 @@ export class Agent {
             model: this.model,
             reasoning: request.reasoning,
         };
+
         const started = Date.now();
-        logAgentEvent({ ...metadata, event: 'request', request });
+
+        logAgentEvent({
+            ...metadata,
+            event: 'request',
+            request
+        });
+
         let response;
+
         try {
             response = await this.client.responses.create(request);
         } catch (error) {
@@ -73,8 +133,10 @@ export class Agent {
                     code: error.code,
                 },
             });
+
             throw error;
         }
+
         logAgentEvent({
             ...metadata,
             event: 'response',
@@ -87,6 +149,7 @@ export class Agent {
                 usage: response.usage,
             },
         });
+
         return response.output_text;
     }
 }

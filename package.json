@@ -8,12 +8,16 @@
     "start": "node --env-file=.env src/index.js",
     "test:star-forge": "node --env-file=.env test-harnesses/star-forge.js",
     "test:context-agent": "node --env-file=.env test-harnesses/context-agent.js",
-    "test:reflection-agent": "node --env-file=.env test-harnesses/reflection-agent.js"
+    "test:reflection-agent": "node --env-file=.env test-harnesses/reflection-agent.js",
+    "test:short-term-memory-agent": "node --env-file=.env test-harnesses/short-term-memory-agent.js",
+    "test:prompt-compiler-agent": "node --env-file=.env test-harnesses/prompt-compiler-agent.js",
+    "test:embeddings": "node --env-file=.env test-harnesses/embeddings-playground.mjs"
   },
   "keywords": [],
   "type": "module",
   "dependencies": {
     "dotenv": "^18.0.8",
+    "fast-json-patch": "^3.1.1",
     "openai": "^7.42.0",
     "zod": "^4.6.7"
   }
